@@ -176,6 +176,7 @@ class FactoriesTestCase(unittest.TestCase):
     Content of nodes is model-specific.
     """
     def testLocalDisjunction(self):
+        # TODO doc
         ioPairs = []
         
         locStates = [[0],[1],[2]]
@@ -201,6 +202,7 @@ class FactoriesTestCase(unittest.TestCase):
             self.assertEqual(rootStates, expStates)
     
     def testCombinationPredicate(self):
+        # TODO doc
         orAgt = model.agt
         model.agt = 3
         orSt = model.st

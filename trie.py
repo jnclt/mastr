@@ -4,7 +4,9 @@
 import model
 import utils
 import strategy
+import forest
 from collections import deque
+from itertools import product
 
 class TrieNode:
     def __init__(self):
@@ -18,8 +20,6 @@ class TrieNode:
         """action from range(model.act) assigned to the perception at
         self.level"""
         self.action = 0
-        # """TrieNode on the same level immediately to the right"""
-        # self.sibling = None
         """parent TrieNode"""
         self.parent = None
         """model.act-long list of the children"""
@@ -110,18 +110,30 @@ class Trie:
         """forest with the strategy"""
         self.forest = forest
         """set of states that must be covered by one node"""
-        self.statesToCover = set([])        
+        self.statesToCover = set([])
     
-    def strategy(self, statesToCover):
+    def strategy(self):
         """
-        Build trie until a leaf containing all states from statesToCover is
-        created. Return the rules on the branch from the node to the root.
+        Build trie until a leaf containing all system states is created.
+        Return the rules on the branch from the node to the root.
         """
-        self.statesToCover = statesToCover
+        # 1. Create the set of all system states
+        self.statesToCover = set(product(range(model.st), repeat=model.agt))
         
-        # traverse the forest 
+        # 2. Sort the predecessors in each node according to the sizes of 
+        # their subtrees. node.preds becomes a sorted list instead of a set!
+        # As a consequence, rules covering most states get high in the trie.
+        
+        # Add the common root
+        cRoot = forest.Node()
+        cRoot.preds = self.forest.roots
+        self.forest.roots = set([cRoot])
+        # Sort
+        cRoot.sortPredecessors()
+        
+        # 3. Traverse the forest 
         # (BFS to take the advantage of the ordering of the preds)
-        # add each node to the trie
+        # and add each node to the trie
         for node in self.forest.traverse(bfs=True):
             strat = self.addNode(node)
             if strat:
