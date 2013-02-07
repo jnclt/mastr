@@ -1,0 +1,12 @@
+output
+__pycache__
+forest.pyc
+model.pyc
+strategy.pyc
+testForest.pyc
+trie.pyc
+utils.pyc
+tests/testStates.bin
+tests/testTree.bin
+tests/testPerceptions.bin
+mastr.tmproj
