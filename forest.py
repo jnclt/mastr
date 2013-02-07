@@ -4,9 +4,9 @@
 import utils
 import model
 import trie
-from collections import deque
 import copy
-import itertools
+from collections import deque
+from itertools import product, combinations
 
 
 class Node:
@@ -44,7 +44,8 @@ class Node:
         return
     
     def __repr__(self):
-        return '(%s:%d, %s)' % (self.state, self.subtreeSize, list(self.rules))
+        return '(%s:%d, %s)' % (self.state, self.subtreeSize, 
+        list(self.rules))
     
     @classmethod
     def factory(cls, state, rules, succ=None):
@@ -270,8 +271,8 @@ class Node:
     
     def export(self, f, format):
         """
-        Export the subtree rooted at self as a part of a dot graph into open
-        file f.
+        Export the subtree rooted at self as a part of a graph in 'format'
+        into open file 'f'.
         """
         self._traverseNode(f, format)
         self._traverseEdge(f, format)
@@ -279,7 +280,7 @@ class Node:
     
     def _traverseNode(self, f, format):
         """
-        Write istelf as a dot command into file f.
+        Write istelf in 'format' into file 'f'.
         """
         nodeStr = ""
         if format == "GraphML":
@@ -310,7 +311,7 @@ class Node:
     
     def _traverseEdge(self, f, format):
         """
-        Write all edges to its predecessors as dot commands into file f.
+        Write all edges to its predecessors in format 'format' into file 'f'.
         """
         if self.succ:
             edgeStr = ""
@@ -327,7 +328,7 @@ class Node:
 
 class Forest:
     """
-    Forest representing the union of strategies for a formula
+    Forest representing the union of all strategies for a formula
     """
     
     def __init__(self, roots):
@@ -397,7 +398,7 @@ class Forest:
         No rules are assigned.
         """
         roots = [Node.factory(state, []) for state in \
-        itertools.product(range(model.st), repeat=model.agt)]
+        product(range(model.st), repeat=model.agt)]
         return cls(set(roots))
     
     @classmethod
@@ -439,14 +440,14 @@ class Forest:
     @classmethod
     def combinationPredicate(cls, agtNum, agtStates):
         """
-        Factory of the forest for all system states, where |agtNum| 
-        agents have local states from the set of agtStates.
+        Factory of the forest for all system states, where |agtNum| agents
+        have local states from the set of agtStates.
         """
         # TODO check args for correctness before calling
         # 0 < agNum <= model.agts, emptyset < agtStates <= model.st
         rootStates = []
         # for every |agtNum|-tuple of agents
-        for comb in itertools.combinations(range(model.agt), agtNum):
+        for comb in combinations(range(model.agt), agtNum):
             locStates = [None for agt in range(model.agt)]
             # specify the set of locals states for each of the agents
             for agt in comb:
@@ -464,9 +465,9 @@ class Forest:
     
     def conjunction(self, f2):
         """
-        Remove from both forests (self and f2) every node that has no
-        weak equivalent in the other forest. By weak equivalent of a node N
-        is meant a node representing the same state and a strategy that is
+        Remove from both forests (self and f2) every node that has no weak
+        equivalent in the other forest. By weak equivalent of a node N is
+        meant a node representing the same state and a strategy that is
         a subset of N's strategy. Join the remnants of the two forests and
         assign them to self.
         """
@@ -484,11 +485,12 @@ class Forest:
     
     def _hasWeakEquivalent(self, node):
         """
-        Helper for conjunction. Return False if there is no weak
-        equivalent of node in self, return True otherwise. Mark every 
-        strong equivalent of node in self with 'included' flag. By strong 
-        equivalent of a node N is meant a node representing the same state 
-        and a strategy that is a strict superset of N's strategy.
+        Helper for Conjunction. 
+        Return False if there is no weak equivalent of node in self, return
+        True otherwise. Mark every strong equivalent of node in self with
+        'included' flag. By strong equivalent of a node N is meant a node
+        representing the same state and a strategy that is a strict superset
+        of N's strategy.
         """
         
         equivalent = False
@@ -561,6 +563,7 @@ class Forest:
     
     def _cycle(self, node, strategyRules):
         """
+        Recursive subroutine for Always
         Extend 'node' having 'strategyRules' with the (pruned)
         trees from self, until a cycle is formed (roots correspond) or
         there is nothing to attach.
@@ -705,8 +708,7 @@ class Forest:
         """Return a single strategy defined for all states included in 
         the forest, if there is one. Return 'None' otherwise.
         """
-        # 1. Check that the forest at least contains all states and
-        # remeber those which the strategy has to cover.
+        # 1. Check that the forest at least contains all states
         
         # At least every state must have been created so far
         if len(utils.usedStates) != pow(model.st, model.agt):
@@ -714,39 +716,20 @@ class Forest:
                 print('utils.usedStates:', len(utils.usedStates))
             return None
         # Traverse the forest while checking against the set of all states
-        # and remembering the states to cover.
-        statesToCover = set([])
-        noncoveredStates = set(itertools.product(range(model.st),
-                                                 repeat=model.agt))
+        noncoveredStates = set(product(range(model.st), repeat=model.agt))
         for node in self.traverse():
             noncoveredStates.discard(node.state)
-            # Drop the roots with empty strategies and without predecessors
-            # (these represent the states satifying the formula with no
-            # strategy needed).
-            if not node.succ and not node.preds and not node.rules:
-                self.roots.remove(node)
-            else:
-                statesToCover.add(node.state)
-        
+            
         if noncoveredStates:
             if __debug__:
                 print('non-covered states:', len(noncoveredStates))
                 print(noncoveredStates)
             return None
         
-        # 2. Try to construct a strategy covering statesToCover
-        
-        # Add the common root
-        cRoot = Node()
-        cRoot.preds = self.roots
-        self.roots = set([cRoot])
-        # Sort the predecessors in each node according to the sizes of their
-        # subtrees. node.preds becomes a sorted list instead of a set!
-        cRoot.sortPredecessors()
-        # Build the trie
+        # 2. Try to construct the strategy covering all states        
         strTrie = trie.Trie(self)
-        # Return the strategy if there is one
-        strategy = strTrie.strategy(statesToCover)
+        # Build the trie and return the strategy if there is one
+        strategy = strTrie.strategy()
         if __debug__:
             strTrie.export(utils.outputPath() + "trie.graphml")
         # TODO move into a unittest for Trie
