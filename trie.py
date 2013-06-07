@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 #encoding: utf-8
-
-import model
-import utils
-import strategy
-import forest
 from collections import deque
 from itertools import product
+
+import forest
+import model
+import strategy
+import utils
+
 
 class TrieNode:
     def __init__(self):

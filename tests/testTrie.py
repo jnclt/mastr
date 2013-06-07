@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 # encoding: utf-8
-
-import unittest
 import pickle
+import unittest
+
 import trie
 import utils
+
 
 class TrieTestCase(unittest.TestCase):
     """

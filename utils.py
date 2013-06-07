@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 #encoding: utf-8
-
-import model
 from os import mkdir
 from os.path import isdir
+
+import model
+
 
 # all rules used in all forests
 usedRules = {}

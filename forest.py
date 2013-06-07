@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 #encoding: utf-8
-
-import utils
-import model
-import trie
 import copy
 from collections import deque
 from itertools import product, combinations
+
+import model
+import trie
+import utils
 
 
 class Node:
@@ -69,7 +69,7 @@ class Node:
     def conflict(rules1, rules2):
         """
         Return True if a rule from rules1 is conflicting with a rule from
-        rules2.
+        rules2.     
         Return False otherwise.
         """
         for rule1 in rules1:
@@ -257,11 +257,12 @@ class Node:
                 vector.pop()
         return preds
     
-    def singleExport(self, fname, format="dot"):
+    def singleExport(self, fname, format="GraphML"):
         """
-        Export the subtree rooted at self in dot format into a file with
+        Export the subtree rooted at self in format 'format' into a file with
         fname.
         """
+        
         with open(fname, 'w') as f:
             f.truncate(0)
             f.write(utils.graphHeader[format])
@@ -414,9 +415,10 @@ class Forest:
         # TODO move the check before the outside call of localDisjunction
         # assert len(locStates) == model.agt,\
         # "Local states for {0} instead of {1} agts specified.".format(\
-        # len(locStates), model.agt)
+        #         len(locStates), model.agt)
         # for (agt, agtStates) in enumerate(locStates):
-        # assert len(agtStates) >= 1, "No states for agt {0}".format(agt)
+        #   assert len(agtStates) >= 1, "No states for agt {0}".format(agt)
+        
         roots = [Node.factory(state, []) for state in \
         cls._globalSuffixes(locStates, len(locStates))]
         return cls(set(roots))
@@ -705,7 +707,8 @@ class Forest:
         return
     
     def totalStrategy(self):
-        """Return a single strategy defined for all states included in 
+        """
+        Return a single strategy defined for all states included in
         the forest, if there is one. Return 'None' otherwise.
         """
         # 1. Check that the forest at least contains all states
@@ -732,13 +735,6 @@ class Forest:
         strategy = strTrie.strategy()
         if __debug__:
             strTrie.export(utils.outputPath() + "trie.graphml")
-        # TODO move into a unittest for Trie
-        if __debug__:
-            gen = strTrie.traverse()
-            next(gen) # skip root
-            for trieNode in gen: 
-                assert trieNode.states >= trieNode.parent.states, "trie degen"
-                assert trieNode.states == \
-                trieNode.parent.states | trieNode.delta, "delta degen"
+        
         return strategy
     

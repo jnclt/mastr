@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 #encoding: utf-8
-
-import unittest
 import collections
-import itertools
 import copy
+import itertools
+import unittest
+
 import forest
 import model
+
 
 class ForestOpsTestCase(unittest.TestCase):
     """

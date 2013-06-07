@@ -3,12 +3,11 @@
 
 import sys
 import getopt
-import formula
-import utils
 import time
 import pickle
 
-
+import formula
+import utils
 
 help_message = '''
 Input is taken from model.py and formula.py
@@ -44,7 +43,8 @@ def main(argv=None):
                 strategyOnly = True
                 
     except Usage as err:
-        print(sys.argv[0].split("/")[-1] + ": " + str(err.msg), file=sys.stderr)
+        print(sys.argv[0].split("/")[-1] + ": " + str(err.msg),
+        file=sys.stderr)
         print("\t for help use --help", file=sys.stderr)
         return 2
         
